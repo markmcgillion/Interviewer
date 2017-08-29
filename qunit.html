@@ -1,0 +1,78 @@
+<html> 
+        <head> 
+           <meta charset = "utf-8"> 
+           <title>QUnit basic example</title> 
+           <link rel = "stylesheet" href = "./jquery/qunit-2.4.0.css"> 
+           <script src = "./jquery/qunit-2.4.0.js"></script> 
+           <script src = "scripts.js"></script>
+        </head> 
+        
+        <body> 
+
+            <div id = "alertContainer"></div>
+            <div id = "paymentAlertContainer"></div>
+            <div id = "balance"></div>
+
+
+           <div id = "qunit"></div> 
+           <div id = "qunit-fixture"></div>  
+           <script> 
+              QUnit.test( "My First Test", function( assert ) { 
+                 var value = "1"; 
+                 assert.equal( value, "1", "Value should be 1" ); 
+              }); 
+
+    
+    
+
+              QUnit.test( "Get Token", function( assert ) { 
+                
+                settings.login.value = {token: "fail"};
+                
+                var done = assert.async(); 
+                
+                var result = login(); 
+                
+                setTimeout(function() {
+                 assert.notEqual( settings.login.value.token , "fail" , "Token found"); 
+                 done();
+                }, 2000);
+                });
+ 
+
+                QUnit.test( "Get Token - Cant find server", function( assert ) { 
+                
+                settings.login.url = "http://notRealURL.boom";
+                
+
+                var done = assert.async(); 
+                
+                var result = login(); 
+                
+          
+
+                setTimeout(function() {
+                  var message = document.getElementById('error');
+                 assert.equal( message.innerHTML , "Error: Could not connect to server" , "Failed correctly with Error" ); 
+                 done();
+                }, 2000);
+                });   
+                
+
+
+                QUnit.test( "Get balance", function( assert ) { 
+
+                  settings.balance.value = {balance: "fail"};
+                  var done = assert.async(); 
+                  var result = getBalance(); 
+                
+
+                setTimeout(function() {
+                 assert.notEqual( error , "fail" , "Balance:" + settings.balance.value.balance ); 
+                 done();
+                }, 2000);
+                });     
+
+           </script> 
+        </body> 
+     </html>
