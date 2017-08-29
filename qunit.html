@@ -1,78 +1,328 @@
-<html> 
-        <head> 
-           <meta charset = "utf-8"> 
-           <title>QUnit basic example</title> 
-           <link rel = "stylesheet" href = "./jquery/qunit-2.4.0.css"> 
-           <script src = "./jquery/qunit-2.4.0.js"></script> 
-           <script src = "scripts.js"></script>
-        </head> 
-        
-        <body> 
+<!DOCTYPE html>
 
-            <div id = "alertContainer"></div>
-            <div id = "paymentAlertContainer"></div>
-            <div id = "balance"></div>
+<html>
 
+<head>
+    <meta charset="utf-8">
 
-           <div id = "qunit"></div> 
-           <div id = "qunit-fixture"></div>  
-           <script> 
-              QUnit.test( "My First Test", function( assert ) { 
-                 var value = "1"; 
-                 assert.equal( value, "1", "Value should be 1" ); 
-              }); 
+    <title>QUnit Unit tests for strips.js</title>
+    <link href="./jquery/qunit-2.4.0.css" rel="stylesheet">
+    <script src="./jquery/qunit-2.4.0.js">
+    </script>
+    <script src="scripts.js">
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js">
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js">
+    </script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js">
+    </script>
+</head>
 
-    
-    
-
-              QUnit.test( "Get Token", function( assert ) { 
-                
-                settings.login.value = {token: "fail"};
-                
-                var done = assert.async(); 
-                
-                var result = login(); 
-                
-                setTimeout(function() {
-                 assert.notEqual( settings.login.value.token , "fail" , "Token found"); 
-                 done();
-                }, 2000);
-                });
- 
-
-                QUnit.test( "Get Token - Cant find server", function( assert ) { 
-                
-                settings.login.url = "http://notRealURL.boom";
-                
-
-                var done = assert.async(); 
-                
-                var result = login(); 
-                
-          
-
-                setTimeout(function() {
-                  var message = document.getElementById('error');
-                 assert.equal( message.innerHTML , "Error: Could not connect to server" , "Failed correctly with Error" ); 
-                 done();
-                }, 2000);
-                });   
-                
+<body>
+    <div id="alertContainer">
+    </div>
 
 
-                QUnit.test( "Get balance", function( assert ) { 
+    <div id="paymentAlertContainer">
+    </div>
 
-                  settings.balance.value = {balance: "fail"};
-                  var done = assert.async(); 
-                  var result = getBalance(); 
-                
 
-                setTimeout(function() {
-                 assert.notEqual( error , "fail" , "Balance:" + settings.balance.value.balance ); 
-                 done();
-                }, 2000);
-                });     
+    <div id="balance">
+    </div>
 
-           </script> 
-        </body> 
-     </html>
+
+    <div id="qunit">
+    </div>
+
+
+    <div id="qunit-fixture">
+    </div>
+    <script>
+       QUnit.module( "Working" );
+       QUnit.test( "load", function( assert ) {
+     
+     
+         var done = assert.async();
+     
+         var result = load();
+     
+         setTimeout( function() {
+           assert.notEqual( settings.login.value.token, undefined, "token found" );
+           assert.notEqual( settings.balance.value, undefined, "Balance found" );
+           assert.notEqual( settings.transactions.value, undefined, "transactions found" );
+           done();
+         }, 6000 );
+       } );
+     
+       QUnit.test( "login", function( assert ) {
+     
+         settings.login.value.token = undefined;
+     
+         var done = assert.async();
+     
+         var result = login();
+     
+         setTimeout( function() {
+           assert.notEqual( settings.login.value.token, undefined, "token found" );
+           done();
+         }, 3000 );
+       } );
+     
+     
+       QUnit.test( "getTransactions", function( assert ) {
+     
+         settings.transactions.value = undefined;
+     
+         var done = assert.async();
+     
+         var result = getTransactions();
+     
+         setTimeout( function() {
+           assert.notEqual( settings.transactions.value, undefined, "transactions found" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "getBalance", function( assert ) {
+     
+         settings.balance.value = undefined;
+     
+         var done = assert.async();
+     
+         var result = getBalance();
+     
+         setTimeout( function() {
+           assert.notEqual( settings.balance.value, undefined, "Balance found" );
+           done();
+         }, 3000 );
+       } );
+     
+     
+       QUnit.test( "makePayment", function( assert ) {
+     
+         document.getElementById( 'description' ).value = "QUNIT TEST";
+         document.getElementById( 'amount' ).value = "12.98";
+     
+         var done = assert.async();
+     
+         var result = makePayment();
+     
+         setTimeout( function() {
+     
+           var amountResult = settings.transactions.value[ settings.transactions.value.length - 1 ].amount;
+           var descriptionResult = settings.transactions.value[ settings.transactions.value.length - 1 ].description;
+           var message = document.getElementById( 'errorpaymentAlertContainer' ).innerHTML;
+           assert.equal( amountResult, "12.98", "correct amount added" );
+           assert.equal( descriptionResult, "QUNIT TEST", "correct description added" );
+           assert.equal( message, "Payment Successful", "Payment success message shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "isValidJSON", function( assert ) {
+         var json = '{"result":true,"count":1}';
+     
+     
+         var valid = isValidJSON( json );
+         var number = isValidJSON( 123 );
+         var invalid = isValidJSON( "sdadasdsd" );
+     
+         assert.equal( valid, true, "Valid JSON passed" );
+         assert.equal( number, false, "Number rejected" );
+         assert.equal( invalid, false, "Invalid rejected" );
+       } );
+     
+       QUnit.module( "Not Acceptable" );
+     
+       QUnit.test( "makePayment", function( assert ) {
+     
+         document.getElementById( 'description' ).value = "QUNIT TEST";
+         document.getElementById( 'amount' ).value = "1200.98";
+     
+         var done = assert.async();
+     
+         var result = makePayment();
+     
+         setTimeout( function() {
+     
+     
+           var message = document.getElementById( 'errorpaymentAlertContainer' ).innerHTML;
+           assert.equal( message, "Payment declined - Please ensure you have sufficient funds", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+     
+       QUnit.module( "unauthorized" );
+     
+       QUnit.test( "getTransaction", function( assert ) {
+     
+         settings.login.value.token = "123";
+     
+         var done = assert.async();
+     
+         var result = getTransactions();
+     
+         setTimeout( function() {
+     
+           var message = document.getElementById( 'erroralertContainer' ).innerHTML;
+           assert.equal( message, "Authorization failed - Please login again", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "getBalance", function( assert ) {
+     
+         settings.login.value.token = "123";
+     
+         var done = assert.async();
+     
+         var result = getBalance();
+     
+         setTimeout( function() {
+     
+           var message = document.getElementById( 'erroralertContainer' ).innerHTML;
+           assert.equal( message, "Authorization failed - Please login again", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "makePayment", function( assert ) {
+     
+         document.getElementById( 'description' ).value = "QUNIT TEST";
+         document.getElementById( 'amount' ).value = "12.98";
+     
+         var done = assert.async();
+     
+         var result = makePayment();
+     
+         setTimeout( function() {
+     
+     
+           var message = document.getElementById( 'errorpaymentAlertContainer' ).innerHTML;
+           assert.equal( message, "Authorization failed - Please login again", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.module( "404 API server" );
+     
+       QUnit.test( "getTransaction", function( assert ) {
+     
+         settings.transactions.url = "http://www.notarealsite54321.lol";
+     
+         var done = assert.async();
+     
+         var result = getTransactions();
+     
+         setTimeout( function() {
+     
+           var message = document.getElementById( 'erroralertContainer' ).innerHTML;
+           assert.equal( message, "Error: Could not connect to server", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "getBalance", function( assert ) {
+     
+         settings.balance.url = "http://www.notarealsite54321.lol";
+     
+         var done = assert.async();
+     
+         var result = getBalance();
+     
+         setTimeout( function() {
+     
+           var message = document.getElementById( 'erroralertContainer' ).innerHTML;
+           assert.equal( message, "Error: Could not connect to server", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+     
+       QUnit.test( "makePayment", function( assert ) {
+     
+         settings.payment.url = "http://www.notarealsite54321.lol";
+     
+         document.getElementById( 'description' ).value = "QUNIT TEST";
+         document.getElementById( 'amount' ).value = "12.98";
+     
+         var done = assert.async();
+     
+         var result = makePayment();
+     
+         setTimeout( function() {
+     
+     
+           var message = document.getElementById( 'errorpaymentAlertContainer' ).innerHTML;
+           assert.equal( message, "Error: Could not connect to server", "Correct error is shown" );
+           done();
+         }, 3000 );
+       } );
+    </script>
+
+
+
+
+
+    <div class="container">
+
+        <div class="alert alert-primary w-100" role="alert">
+            Welcome to #Interviewer - Much Better Than The Rest!
+        </div>
+        <div class="text-right" id="balanceContainer">Your Balance is: </div>
+        <a href="#TEST" class="btn btn-info " data-toggle="collapse">Transactions</a>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#paymentModal">Make Payment</button>
+
+
+        <div class="collapse" id="TEST">
+            <div class="list-group" id="transactionsList"></div>
+            <table id="transactionsTable" class="collapse"></table>
+
+        </div>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="paymentModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body">
+                    <p>
+                        <h3>Please enter payment details:</h3>
+                    </p>
+                    <form>
+                        <div class="form-group">
+                            <label for="description">
+                                  <large>Description</large>
+                              </label>
+                            <input type="text" class="form-control" id="description">
+                        </div>
+                        <div class="form-group">
+                            <label for="amount">
+                                  <large>Amount</large>
+                              </label>
+                            <input type="number" min="0" class="form-control" id="amount">
+                        </div>
+                        <div class="checkbox">
+                        </div>
+                        <button type="button" class="btn btn-success" onclick="makePayment(settings.payment)">Submit</button>
+                        <br><br>
+                    </form>
+                    <div id="paymentAlertContainer">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+</body>
+
+</html>
